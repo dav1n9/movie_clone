@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:movie_clone/bottom_navi.dart';
 import 'package:movie_clone/screen/buy_ticket_screen.dart';
 import 'package:movie_clone/screen/mobile_order_screen.dart';
@@ -6,7 +7,9 @@ import 'package:movie_clone/screen/my_page_screen.dart';
 
 import 'screen/main_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   runApp(const MyApp());
 }
 
