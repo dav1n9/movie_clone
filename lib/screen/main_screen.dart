@@ -5,7 +5,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
-import 'package:movie_clone/api/movie_info_client.dart';
 import 'package:movie_clone/screen/movie_info_screen.dart';
 import '../api/boxoffice_rest_client.dart';
 
