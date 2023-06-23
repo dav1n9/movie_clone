@@ -1,5 +1,11 @@
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:intl/intl.dart';
+import '../api/boxoffice_rest_client.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -11,6 +17,37 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   List<String> events = ["O.T", "쿠폰팩", "매니아", "1Pick", "메가굿즈#", "배라박스", "매진임박"];
   List<String> category = ["박스오피스", "상영예정", "돌비시네마", "단독", "클소", "필소"];
+
+  late final client;
+  @override
+  void initState() {
+    final dio = Dio();
+    client = BoxOfficeRestClient(dio);
+
+    super.initState();
+  }
+
+  Future<List<DailyBoxOffice>> dailyBoxOfficeFromJson() async {
+    List<DailyBoxOffice> result = [];
+    String s = await client.getDailyBoxOffice(dotenv.get("apiKey"), getToday());
+    List<dynamic> list =
+        json.decode(s)["boxOfficeResult"]["dailyBoxOfficeList"];
+    for (int i = 0; i < list.length; i++) {
+      result.add(DailyBoxOffice.fromJson(list[i]));
+    }
+    return result;
+  }
+
+  // 오늘날짜 받아오기
+  String getToday() {
+    DateTime now = DateTime.now();
+    DateFormat formatter = DateFormat('yyyyMMdd');
+    //var strToday = formatter.format(now);
+    var strToday = (int.parse(formatter.format(now)) - 1).toString();
+
+    print("strToday : $strToday");
+    return strToday;
+  }
 
   Widget eventsBox(String name) {
     return InkWell(
@@ -33,7 +70,7 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  Widget movieBox() {
+  Widget movieBox(DailyBoxOffice dailyBoxOffice) {
     return Container(
       margin: const EdgeInsets.all(10),
       decoration: BoxDecoration(
@@ -55,20 +92,28 @@ class _MainScreenState extends State<MainScreen> {
               },
             ),
           ),
-          const SizedBox(height: 20),
-          const Text(
-            "영화 이름",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
+            child: Text(
+              "${dailyBoxOffice.movieNm}",
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
             ),
           ),
-          const Row(
+          Row(
             children: [
-              Text("예매율 27.2%"),
-              SizedBox(width: 15),
-              Text("⭐평점"),
+              Text("예매율 ${dailyBoxOffice.salesShare}"),
+              const SizedBox(width: 15),
+              const Text("⭐평점"),
             ],
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+            child: Text(
+              "개봉일 ${dailyBoxOffice.openDt}",
+            ),
           ),
           Padding(
             padding: const EdgeInsets.all(15.0),
@@ -102,6 +147,7 @@ class _MainScreenState extends State<MainScreen> {
       ),
       body: SingleChildScrollView(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
               decoration: BoxDecoration(
@@ -133,13 +179,33 @@ class _MainScreenState extends State<MainScreen> {
                 ),
               ),
             ),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(children: [
-                for (int i = 0; i < 8; i++) ...[movieBox()]
-              ]),
+            FutureBuilder<List<DailyBoxOffice>>(
+              future: dailyBoxOfficeFromJson(),
+
+              //String
+              // parsing => List<Map<String, dynamic>>
+
+              builder: (context, snapshot) {
+                // response body가 받아와지는 동안 로딩화면이 띄워지도록 하는 코드
+                if (!snapshot.hasData) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                print(snapshot.data.runtimeType);
+
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: snapshot.data!.map((e) => movieBox(e)).toList(),
+                  ),
+                );
+              },
             ),
-            const Text("더 많은 영화보기 >"),
+            const Padding(
+              padding: EdgeInsets.only(left: 10),
+              child: Text("더 많은 영화보기 >"),
+            ),
           ],
         ),
       ),
