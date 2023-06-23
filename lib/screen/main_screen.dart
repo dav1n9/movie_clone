@@ -5,6 +5,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
+import 'package:movie_clone/api/movie_info_client.dart';
+import 'package:movie_clone/screen/movie_info_screen.dart';
 import '../api/boxoffice_rest_client.dart';
 
 class MainScreen extends StatefulWidget {
@@ -197,7 +199,18 @@ class _MainScreenState extends State<MainScreen> {
                 return SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
-                    children: snapshot.data!.map((e) => movieBox(e)).toList(),
+                    children: snapshot.data!.map((e) {
+                      return InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const MovieInfoScreen()),
+                          );
+                        },
+                        child: movieBox(e),
+                      );
+                    }).toList(),
                   ),
                 );
               },
