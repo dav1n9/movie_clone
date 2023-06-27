@@ -204,7 +204,10 @@ class _MainScreenState extends State<MainScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const MovieInfoScreen()),
+                              builder: (context) => MovieInfoScreen(
+                                movieCd: '${e.movieCd}',
+                              ),
+                            ),
                           );
                         },
                         child: movieBox(e),
