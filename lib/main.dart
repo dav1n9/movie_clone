@@ -56,9 +56,10 @@ class _HomePageState extends State<HomePage> {
             });
           },
         ),
-        body: const SafeArea(
+        body: SafeArea(
           child: IndexedStack(
-            children: [
+            index: index,
+            children: const [
               MainScreen(),
               BuyTicketScreen(),
               MobileOrderScreen(),

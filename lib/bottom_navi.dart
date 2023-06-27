@@ -19,9 +19,8 @@ class _BottomNaviState extends State<BottomNavi> {
   Widget build(BuildContext context) {
     return BottomNavigationBar(
       onTap: (int index) {
-        setState(() {
-          selectedIndex = index;
-        });
+        widget.onTap(index);
+        selectedIndex = index;
       },
       currentIndex: selectedIndex,
       type: BottomNavigationBarType.fixed, // 애니메이션 없음
